@@ -41,8 +41,24 @@ class UNet(torch.nn.Module):
         return torch.sigmoid(self.final(x))
 
 device = torch.device("cpu")
+import os
+
 model = UNet().to(device)
-model.load_state_dict(torch.load("best_model.pth", map_location=device))
+
+model_path = "best_model.pth"
+
+# Check if model exists
+if not os.path.exists(model_path):
+    raise FileNotFoundError("Model file not found! Make sure best_model.pth is in repo.")
+
+# Load safely
+state_dict = torch.load(model_path, map_location=device)
+
+# Fix key mismatch (if any)
+if list(state_dict.keys())[0].startswith("module."):
+    state_dict = {k.replace("module.", ""): v for k, v in state_dict.items()}
+
+model.load_state_dict(state_dict)
 model.eval()
 
 # -----------------------------
