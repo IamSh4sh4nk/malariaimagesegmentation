@@ -61,6 +61,14 @@ if list(state_dict.keys())[0].startswith("module."):
 model.load_state_dict(state_dict)
 model.eval()
 
+try:
+    state_dict = torch.load("best_model.pth", map_location=device)
+    model.load_state_dict(state_dict)
+except Exception as e:
+    import traceback
+    st.text("FULL ERROR:")
+    st.text(traceback.format_exc())
+
 # -----------------------------
 # Preprocessing
 # -----------------------------
