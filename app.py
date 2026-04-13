@@ -54,6 +54,8 @@ class UNet(nn.Module):
 
         return torch.sigmoid(self.final(x))
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 model = UNet().to(device)
 
 model_path = "best_model.pth"
