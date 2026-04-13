@@ -2,6 +2,7 @@ import streamlit as st
 import torch
 import cv2
 import numpy as np
+import torch.nn as nn
 from PIL import Image
 
 # -----------------------------
