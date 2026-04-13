@@ -20,28 +20,38 @@ class DoubleConv(torch.nn.Module):
     def forward(self, x):
         return self.conv(x)
 
-class UNet(torch.nn.Module):
+class UNet(nn.Module):
     def __init__(self):
         super().__init__()
-        self.down1 = DoubleConv(1,64)
-        self.down2 = DoubleConv(64,128)
-        self.pool = torch.nn.MaxPool2d(2)
 
-        self.up = torch.nn.ConvTranspose2d(128,64,2,2)
-        self.conv = DoubleConv(128,64)
+        self.down1 = DoubleConv(1, 64)
+        self.down2 = DoubleConv(64, 128)
+        self.down3 = DoubleConv(128, 256)
 
-        self.final = torch.nn.Conv2d(64,1,1)
+        self.pool = nn.MaxPool2d(2)
 
-    def forward(self,x):
+        self.up1 = nn.ConvTranspose2d(256, 128, 2, 2)
+        self.conv1 = DoubleConv(256, 128)
+
+        self.up2 = nn.ConvTranspose2d(128, 64, 2, 2)
+        self.conv2 = DoubleConv(128, 64)
+
+        self.final = nn.Conv2d(64, 1, 1)
+
+    def forward(self, x):
         x1 = self.down1(x)
         x2 = self.down2(self.pool(x1))
-        x = self.up(x2)
-        x = torch.cat([x, x1], dim=1)
-        x = self.conv(x)
-        return torch.sigmoid(self.final(x))
+        x3 = self.down3(self.pool(x2))
 
-device = torch.device("cpu")
-import os
+        x = self.up1(x3)
+        x = torch.cat([x, x2], dim=1)
+        x = self.conv1(x)
+
+        x = self.up2(x)
+        x = torch.cat([x, x1], dim=1)
+        x = self.conv2(x)
+
+        return torch.sigmoid(self.final(x))
 
 model = UNet().to(device)
 
